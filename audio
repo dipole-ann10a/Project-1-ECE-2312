@@ -1,0 +1,146 @@
+%audio setup for devices
+info = audiodevinfo
+info.input(1);
+recObj1 = audiorecorder(48000,8,1);
+recDuration = 8;
+disp("Begin speaking.")
+recordblocking(recObj1,recDuration);
+disp("End of recording.")
+
+
+recObj2 = audiorecorder
+disp("Begin speaking.")
+recordblocking(recObj2,recDuration);
+disp("End of recording.")
+
+recObj3 = audiorecorder
+disp("Begin speaking.")
+recordblocking(recObj3,recDuration);
+disp("End of recording.")
+
+%Plot audio data in time frequency
+y1 = getaudiodata(recObj1);
+plot(y1);
+ylabel("Amplitude");
+xlabel("Time(s)");
+title("Phrase 1");
+y2 = getaudiodata(recObj2);
+plot(y2);
+ylabel("Amplitude");
+xlabel("Time(s)");
+title("Phrase 2");
+y3 = getaudiodata(recObj3);
+plot(y3);
+ylabel("Amplitude");
+xlabel("Time(s)");
+title("Phrase 3");
+
+%first set of Spectrograms
+spectrogram(y1,'yaxis', kaiser(256,5),128,[], 48000);
+title("Phrase 1");
+spectrogram(y2,'yaxis', kaiser(256,5),128,[], 48000);
+title("Phrase 2");
+spectrogram(y3,'yaxis', kaiser(256,5),128,[], 48000);
+title("Phrase 3");
+
+%make data into .wav files,sampling @ 48000 hz
+audiowrite('y1.wav',y1,48000);
+audiowrite('y2.wav',y2,48000);
+audiowrite('y3.wav',y3,48000);
+
+%re-read audio data from .wav file
+[y1wav,fs1] = audioread('y1.wav');
+
+
+[y2wav,fs2] = audioread('y2.wav');
+[y3wav,fs3] = audioread('y3.wav');
+
+%store it in array and replot spectrograms
+spectrogram(y1wav,'yaxis', kaiser(256,5),128,[], 48000);
+title("Phrase 1");
+spectrogram(y2wav,'yaxis', kaiser(256,5),128,[], 48000);
+title("Phrase 2");
+spectrogram(y3wav,'yaxis', kaiser(256,5),128,[], 48000);
+title("Phrase 3");
+
+%find time delay for head circumference
+avgheadin = 22.3/pi;
+headdelay = ((avgheadin/39.37)/343)*10^(-3);
+%calculate for 1zero = some time| 1zero = 0.0625s/3zeros
+convrate = 3/0.0625;
+avghead = [zeros(int32(headdelay*convrate),1);y1wav];
+onemil = [zeros(int32(1*convrate),1);y1wav];
+tenmil = [zeros(int32(10*convrate),1);y1wav];
+hundredmil = [zeros(int32(100*convrate),1);y1wav];
+
+%Delay Signal fs1 from .wav file and play back[left right]
+audiowrite('teamann-stereosoundfile-00.wav',[y1wav,y1wav],48000);
+audiowrite('teamann-stereosoundfile-0head.wav',[y1wav,avghead],48000);
+audiowrite('teamann-stereosoundfile-01.wav',[[y1wav;zeros(48,1)],onemil],48000);
+audiowrite('teamann-stereosoundfile-10.wav',[[y1wav;zeros(480,1)], tenmil],48000);
+audiowrite('teamann-stereosoundfile-100.wav',[[y1wav;zeros(4800,1)], hundredmil],48000);
+
+
+[d1,fd1] = audioread('teamann-stereosoundfile-00.wav');
+[d2,fd2] = audioread('teamann-stereosoundfile-0head.wav');
+[d3,fd3] = audioread('teamann-stereosoundfile-01.wav');
+[d4,fd4] = audioread('teamann-stereosoundfile-10.wav');
+[d5,fd5] = audioread('teamann-stereosoundfile-100.wav');
+
+
+sound(d1,fd1);
+
+sound(d2,fd2);
+
+sound(d3,fd3);
+
+sound(d4,fd4);
+
+sound(d5,fd5);
+
+
+%attenuate data and store in arrays to save as .wav files
+r1 = y1wav.*0.25;
+r2 = y1wav.*0.5;
+r3 = y1wav.*1.0;
+r4 = y1wav.*avgheadin;
+r5 = y1wav.*(5/3);
+
+onefivedb = [y1wav;r1];
+threedb = [y1wav; r2];
+sixdb = [y1wav; r3];
+avghead1 = [y1wav; r4];
+avgheadone5db = [y1wav; r5];
+
+%Attenuate signal and play back
+audiowrite('teamann-stereosoundfile-01.wav',y1wav,48000);
+audiowrite('teamann-stereosoundfile-02.wav',onefivedb,48000);
+audiowrite('teamann-stereosoundfile-03.wav',threedb,48000);
+audiowrite('teamann-stereosoundfile-04.wav',sixdb,48000);
+audiowrite('teamann-stereosoundfile-05.wav',avghead1,48000);
+audiowrite('teamann-stereosoundfile-06.wav',avgheadone5db,48000);
+
+[z1,fz1] = audioread('teamann-stereosoundfile-01.wav');
+[z2,fz2] = audioread('teamann-stereosoundfile-02.wav');
+[z3,fz3] = audioread('teamann-stereosoundfile-03.wav');
+[z4,fz4] = audioread('teamann-stereosoundfile-04.wav');
+[z5,fz5] = audioread('teamann-stereosoundfile-05.wav');
+[z6,fz6] = audioread('teamann-stereosoundfile-06.wav');
+
+
+sound(z1,fz1);
+
+
+sound(z2,fz2);
+
+
+sound(z3,fz3);
+
+
+sound(z4,fz4);
+
+
+sound(z5,fz5);
+
+
+sound(z6,fz6);
